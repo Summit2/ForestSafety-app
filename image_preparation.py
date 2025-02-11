@@ -1,7 +1,9 @@
 import numpy as np
+import cv2
+
 
 def prepareImage(img):
-    img = img / 65536
+    img = img / 2**16
     preparedImage =  np.array(
             np.dstack([
                     img[:,:,3],
@@ -24,6 +26,9 @@ def prepareImage(img):
     return preparedImage
 
 def prepareMask(mask):
+    
     mask = (mask*65536).astype(int)
     mask[mask>1]=1
     return mask[:,:,0]
+
+
