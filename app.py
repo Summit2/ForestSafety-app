@@ -47,11 +47,11 @@ def pipeline(dataImg1 : dict, dataImg2 : dict):
     # Получение полигонов
     polygons = simplifyPolygons(preparedMask, epsilon=0.05)
 
-    polygonsPrepared = polygonsToGeopolygons(polygons, bounds, affine_transformation)
+    geo_polygons = polygonsToGeopolygons(polygons, 
+                                       dataImg1['transform'],
+                                       dataImg1['coordinatesType'])
     
-    
-    
-    return polygonsPrepared
+    return geo_polygons
 
 
 

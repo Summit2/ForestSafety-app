@@ -16,32 +16,30 @@ def getPolygons(mask,level = 0.5):
             polygon[i,1], polygon[i,0] =  polygon[i,0], polygon[i,1]
     return polygons
 
-def simplifyPolygons(mask, epsilon = 5):
+def simplifyPolygons(mask, epsilon=5):
     polygons = getPolygons(mask)
+    simplified_polygons = []
     for polygon in polygons:
-        polygon = simplify_coords_vw(polygon,epsilon) #Висвалингам-Уатт
-    return polygons
+        simplified = simplify_coords_vw(polygon, epsilon)
+        simplified_polygons.append(simplified)
+    return simplified_polygons
 
-def polygonsToGeopolygons(polygons, bounds, affine_transformation):
+from pyproj import Transformer
+
+def polygonsToGeopolygons(polygons, transform, src_crs):
+    """Преобразует полигоны в географические координаты (WGS84)"""
+    transformer = Transformer.from_crs(src_crs, "EPSG:4326", always_xy=True)
     
-    
-
-    affine_matrix = np.array([
-        [affine_transformation.a, affine_transformation.b, affine_transformation.c], 
-        [affine_transformation.d, affine_transformation.e, affine_transformation.f], 
-        [0, 0, 1]
-    ])
-
-    print(affine_matrix)
-
     geoPolygons = []
     for polygon in polygons:
         geoPoly = []
-        for x, y in polygon:
-            coords = np.array([y,x,1])
-
-            geoCoords =  affine_matrix @ coords
-
-            geoPoly.append(geoCoords.astype(int).tolist()[:-1])
+        for y, x in polygon:  # y,x - координаты в пикселях
+            # 1. Пиксели → UTM
+            x_utm, y_utm = transform * (x, y)
+            
+            # 2. UTM → WGS84 (долгота, широта)
+            lon, lat = transformer.transform(x_utm, y_utm)
+            
+            geoPoly.append([lon, lat])
         geoPolygons.append(geoPoly)
     return geoPolygons
