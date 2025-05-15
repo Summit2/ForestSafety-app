@@ -6,15 +6,18 @@ import cv2
 from onnx_model import OnnxModel
 from image_preparation import prepareImage, prepareMask
 from polygons_preparation import simplifyPolygons,polygonsToGeopolygons
+from flask_cors import CORS  # ← импортируем CORS
 
 # Инициализация модели
 MODEL_PATH = "model_unet.onnx"
 model = OnnxModel(MODEL_PATH)
 
 app = Flask(__name__)
-
-
-
+CORS(app)  # ← разрешаем CORS для всех маршрутов по умолчанию
+'''
+source ./env/bin/activate
+curl -X POST -F "file1=@output1.tif" -F "file2=@output2.tif" http://127.0.0.1:5000/get_polygons/
+'''
 
 def pipeline(dataImg1 : dict, dataImg2 : dict):
     """Обрабатывает изображения и возвращает полигоны в географических координатах."""
